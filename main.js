@@ -18,28 +18,27 @@
       WB2.anyWhere(function(WB){
         var uid;
         function loadWeibo(page) {
-          WB.parseCMD("/statuses/user_timeline/ids.json", function(data){
-            WB.parseCMD("/statuses/count.json", function(data) {
-              var $posts = $('#posts')
-              data.forEach(function (value) {
-                if (value.reposts >= repostSetting) {
-                  WB.parseCMD("/statuses/show.json", function(data) {
-                    $posts.append(
-                      $('<p>')
-                      .append(
-                        $('<button class="btn btn-danger">删除</button>')
-                      )
-                      .append($('<span class="badge">').text(data.reposts_count))
-                      .append(data.text)
-                    );
-                  }, {
-                    id: value.id
-                  }, { 'method': 'GET' });
-                }
-              });
-            }, {
-              ids: data["statuses"].join(',')
-            }, { 'method': 'GET' });
+          WB.parseCMD("/statuses/user_timeline.json", function(data){
+            var $posts = $('#posts')
+            data["statuses"].forEach(function (value) {
+              if (value.reposts_count >= repostSetting) {
+                $posts.append(
+                  $('<tr>')
+                  .data('id', value.id)
+                  .append(
+                    $('<td><button class="btn btn-danger">删除</button></td>')
+                  )
+                  .append(
+                    $('<td>').append(
+                      $('<span class="badge">').text(value.reposts_count)
+                    )
+                  )
+                  .append(
+                    $('<td>').text(value.text)
+                  )
+                );
+              }
+            });
             if (data["statuses"].length === 100) {
               setTimeout(loadWeibo, 1, page + 1);
             }
@@ -69,6 +68,17 @@
           }, { 'uid': data.uid }, { 'method': 'GET' });
           loadWeibo(1);
         },{},{ 'method': 'GET' });
+      });
+    });
+  });
+
+  $('#posts').on('click', 'button', function () {
+    var $tr = $(this).parent('tr');
+    WB2.anyWhere(function(WB){
+      WB.parseCMD('/statuses/destroy.json', function(data) {
+        $tr.fadeOut();
+      }, {
+        'id': $tr.data('id')
       });
     });
   });
