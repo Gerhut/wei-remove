@@ -73,7 +73,7 @@
   });
 
   $('#posts').on('click', 'button', function () {
-    var $tr = $(this).parent('tr');
+    var $tr = $(this).parents('tr');
     WB2.anyWhere(function(WB){
       WB.parseCMD('/statuses/destroy.json', function(data) {
         $tr.fadeOut();
