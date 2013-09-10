@@ -1,4 +1,4 @@
-weibo-remove
+Wei Romove
 ============
 
 自动删除转发数超过500的微博⋯⋯
