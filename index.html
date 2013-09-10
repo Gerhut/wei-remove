@@ -10,6 +10,10 @@
       display: none;
       width: 4em;
     }
+    .badge {
+      margin-left: 1em;
+      margin-right: 1em;
+    }
   </style>
 </head>
 <body>
@@ -18,7 +22,7 @@
       <h1>
         Wei Remove
         <small>
-          一键清除转发数超过
+          清除转发数超过
           <a id="countLabel" href="javascript:;">500</a>
           <label class="sr-only" for="count">转发数</label>
           <input type="number" id="countInput" class="form-inline" value="500">
@@ -26,10 +30,12 @@
         </small>
       </h1>
     </div>
-    <div id="login"></div>
+    <div id="login"><button id="loginButton" class="btn btn-primary">微博登录</button></div>
   </div>
+  <div id="posts" class="container"></div>
   <script src="http://lib.sinaapp.com/js/jquery/2.0.3/jquery-2.0.3.min.js"></script>
 	<script src="http://lib.sinaapp.com/js/bootstrap/v3.0.0/js/bootstrap.min.js"></script>
+  <script src="http://tjs.sjs.sinajs.cn/open/api/js/wb.js?appkey=3401047418"></script>
   <script src="main.js"></script>
 </body>
 </html>

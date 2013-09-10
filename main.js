@@ -1,7 +1,4 @@
 (function () {
-  var APP_KEY = '3401047418'
-    , token;
-
   $('#countLabel').click(function () {
     $('#countInput').val(
       $('#countLabel').hide().text()
@@ -11,23 +8,68 @@
     $('#countLabel').text(
       $('#countInput').hide().val()
     ).show();
-  })
+  });
 
-  if (location.search.substring(0,6) !== '?code=') {
-    $('<button class="btn btn-primary">')
-      .text('微博登录')
-      .click(function () {
-        location.href = 'https://api.weibo.com/oauth2/authorize'
-          + '?client_id=' + APP_KEY
-          + '&response_type=code'
-          + '&redirect_uri=http://gerhut.github.io/wei-remove/';
-      })
-      .appendTo('#login');
-  } else {
-    token = location.search.substring(6, 32);
-    $.getJSON('https://api.weibo.com/2/account/get_uid.json')
-      .done(function (data) {
-        $('#login').text(data);
+  $('#loginButton').click(function () {
+    var repostSetting = parseInt($('#countLabel').text(), 10);
+    if (isNaN(repostSetting)) repostSetting = 500;
+    $('#countLabel').replaceWith(repostSetting);
+    WB2.login(function () {
+      WB2.anyWhere(function(WB){
+        var uid;
+        function loadWeibo(page) {
+          WB.parseCMD("/statuses/user_timeline/ids.json", function(data){
+            WB.parseCMD("/statuses/count.json", function(data) {
+              var $posts = $('#posts')
+              data.forEach(function (value) {
+                if (value.reposts >= repostSetting) {
+                  WB.parseCMD("/statuses/show.json", function(data) {
+                    $posts.append(
+                      $('<p>')
+                      .append(
+                        $('<button class="btn btn-danger">删除</button>')
+                      )
+                      .append($('<span class="badge">').text(data.reposts_count))
+                      .append(data.text)
+                    );
+                  }, {
+                    id: value.id
+                  }, { 'method': 'GET' });
+                }
+              });
+            }, {
+              ids: data["statuses"].join(',')
+            }, { 'method': 'GET' });
+            if (data["statuses"].length === 100) {
+              setTimeout(loadWeibo, 1, page + 1);
+            }
+          }, {
+            'uid': uid,
+            'count': 100,
+            'page': page,
+            'feature': 1
+          }, { 'method': 'GET' });
+        }
+
+        WB.parseCMD("/account/get_uid.json", function(data){
+          uid = data['uid'];
+          WB.parseCMD("/users/show.json", function(data){
+            $('#login').empty()
+            .addClass('media')
+            .append(
+              $('<img class="media-object pull-left">')
+              .attr('src', data['profile_image_url'])
+            ).append(
+              $('<div class="media-body">')
+              .append(
+                $('<h4 class="media-heading">')
+                .text(data['screen_name'])
+              )
+            );
+          }, { 'uid': data.uid }, { 'method': 'GET' });
+          loadWeibo(1);
+        },{},{ 'method': 'GET' });
       });
-  }
+    });
+  });
 })();
